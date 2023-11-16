@@ -1,0 +1,49 @@
+version:  '4.22'
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_db
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+     POSTGRES_DB: event_vk
+     POSTGRES_PASSWORD: postgres
+     POSTGRES_USER: postgres
+     PGDATA: /var/lib/postgresql/data
+     restart: always
+
+  mySQL:
+    image: mysql:8.0
+    container_name: mySQL_DB
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_DATABASE=root
+      - MYSQL_ROOT_PASSWORD=root
+    restart: always
+
+#  events-vk.com:
+#    image: events-vk.com:latest
+#    ports:
+#      - 8080:8080
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/event_vk
+#      - SPRING_DATASOURCE_USERNAME=postgres
+#      - SPRING_DATASOURCE_PASSWORD=postgres
+#      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - '3000:3000'
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
