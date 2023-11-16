@@ -13,6 +13,7 @@ import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import nonapi.io.github.classgraph.concurrency.AutoCloseableExecutorService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 @Component
 @Slf4j
@@ -41,11 +44,10 @@ public class SearchService {
     private int MAX_EXECUTE_REQUESTS;
 
     public Set<Integer> executeSearch(String cityId) {
-
         List<String> executeList = getExecuteRequests(cityId);
         Set<Integer> eventsId = new ConcurrentSkipListSet<>();
 
-        try (ExecutorService executorService = Executors.newFixedThreadPool(4)) {
+        try (AutoCloseableExecutorService executorService = (AutoCloseableExecutorService) newFixedThreadPool(4)) {
             for (String s : executeList) {
                 executorService.submit(new TaskExecuteRequest(tokenService, s, eventsId));
             }
